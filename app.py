@@ -3,6 +3,7 @@ import tempfile
 import streamlit as st
 from src.workflow import graph
 from src.pdf_parser import extract_text_from_pdf
+from src.docx_builder import build_docx_resume
 
 st.set_page_config(
     page_title="🚀 Job Application Copilot",
@@ -255,6 +256,23 @@ if generate:
 
             # Final modified resume text
             final_resume_text = result.get("final_resume_text", "")
+
+            if result.get("structured_resume"):
+                temp_docx = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+                temp_docx_path = temp_docx.name
+                temp_docx.close()
+
+                build_docx_resume(result["structured_resume"], temp_docx_path)
+
+                with open(temp_docx_path, "rb") as f:
+                    st.download_button(
+                        label="📄 Download Resume (DOCX)",
+                        data=f,
+                        file_name="tailored_resume.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        use_container_width=True
+                    )
+
             if final_resume_text:
                 st.subheader("📄 Modified Resume Draft")
                 st.markdown('<div class="output-container">', unsafe_allow_html=True)
