@@ -252,17 +252,3 @@ if generate:
 st.markdown("---")
 st.markdown("Built with ❤️ using Streamlit and LangGraph | Powered by OpenAI GPT")
 st.markdown("💡 **Pro Tip:** Review and personalize the generated content before submitting your application!")
-
-        st.download_button(
-            label="Download Bullets",
-            data=bullets_text,
-            file_name="tailored_bullets.txt",
-            mime="text/plain"
-        )
-
-        st.download_button(
-            label="Download Cover Letter",
-            data=result["cover_letter"],
-            file_name="cover_letter.txt",
-            mime="text/plain"
-        )
