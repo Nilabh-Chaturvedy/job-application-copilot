@@ -74,26 +74,55 @@ python main.py
 
 ## Deployment
 
-### Streamlit Cloud
+### Streamlit Cloud (Recommended)
 
-1. Push to GitHub
-2. Connect to Streamlit Cloud
-3. Deploy with `app.py` as entry point
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Connect your GitHub account
+3. Select the `job-application-copilot` repository
+4. Set the main file path to `app.py`
+5. Add secrets in the "Advanced settings" section:
+   ```
+   OPENAI_API_KEY = "your_openai_api_key_here"
+   OPENAI_MODEL = "gpt-4"  # or your preferred model
+   ```
+6. Click "Deploy"
 
-### Docker
+### Heroku
 
-Build and run with Docker:
+1. Install Heroku CLI
+2. Login: `heroku login`
+3. Create app: `heroku create your-app-name`
+4. Set environment variables:
+   ```bash
+   heroku config:set OPENAI_API_KEY=your_key_here
+   heroku config:set OPENAI_MODEL=gpt-4
+   ```
+5. Deploy:
+   ```bash
+   git push heroku master
+   ```
+
+### Railway
+
+1. Go to [railway.app](https://railway.app)
+2. Connect GitHub repository
+3. Add environment variables in the Variables section
+4. Deploy automatically
+
+### Docker Deployment
+
+For platforms supporting Docker (AWS, GCP, DigitalOcean, etc.):
+
 ```bash
 docker build -t job-app-copilot .
-docker run -p 8501:8501 job-app-copilot
+docker run -p 8501:8501 -e OPENAI_API_KEY=your_key job-app-copilot
 ```
 
-### Local Deployment
+## Environment Variables
 
-For local deployment with custom port:
-```bash
-streamlit run app.py --server.port 8501 --server.address 0.0.0.0
-```
+Required environment variables:
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `OPENAI_MODEL`: Model to use (default: gpt-4-mini)
 
 ## Configuration
 
