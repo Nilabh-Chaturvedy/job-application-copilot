@@ -121,6 +121,7 @@ Thumbs.db
 
 # Data files (if any sensitive)
 data/*.txt
+data/*.pdf
 !data/.gitkeep
 
 # Logs

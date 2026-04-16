@@ -7,11 +7,13 @@ def writer_agent(state):
         state["rewritten_bullets"] = []
         return state
 
+    structured_resume=state["structured_resume"]
+
     prompt = f"""
 You are an expert resume writer.
 
 Candidate Resume:
-{state["resume_text"]}
+{structured_resume}
 
 Job Description:
 {state["job_description"]}
