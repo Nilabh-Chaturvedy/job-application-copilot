@@ -95,7 +95,7 @@ with st.sidebar:
 
     <div class="instruction-box">
     <h4>🤖 Step 3: Generate Materials</h4>
-    <p>The AI workflow will extract text, tailor resume bullets, generate a cover letter, and verify the result.</p>
+    <p>The AI workflow will extract text, tailor resume bullets for all job experiences, generate a cover letter, verify quality, and provide ATS compatibility scoring.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -103,8 +103,9 @@ with st.sidebar:
     st.markdown("""
     - 📄 **PDF Upload**: Resume PDF support
     - ✨ **Smart Analysis**: AI-powered job matching
-    - 📝 **Tailored Bullets**: Customized resume points
+    - 📝 **Tailored Bullets**: Customized resume points for all jobs
     - ✉️ **Cover Letter**: Personalized application letter
+    - 📊 **ATS Scoring**: Comprehensive Applicant Tracking System evaluation
     - ✅ **Quality Check**: Built-in verification system
     - 💾 **Easy Export**: Download ready-to-use files
     """)
@@ -180,12 +181,14 @@ if generate:
                 "job_description": job_description,
                 "structured_resume": {},
                 "plan": [],
-                "rewritten_bullets": [],
+                "rewritten_bullets": [],  # Now a list of lists for per-job bullets
                 "cover_letter": "",
                 "final_resume_text": "",
                 "verification_passed": False,
                 "feedback": "",
                 "retry_count": 0,
+                "ats_score": 0.0,  # New ATS score field
+                "ats_breakdown": {},  # New ATS breakdown field
             }
 
             status_text.text("✍️ Generating tailored materials...")
@@ -219,12 +222,23 @@ if generate:
 
             bullets = result.get("rewritten_bullets", [])
             if bullets:
-                for i, bullet in enumerate(bullets, 1):
-                    st.markdown(f'<div class="bullet-point"><strong>{i}.</strong> {bullet}</div>', unsafe_allow_html=True)
+                for job_idx, job_bullets in enumerate(bullets, 1):
+                    st.markdown(f"**Job Experience {job_idx}:**")
+                    for i, bullet in enumerate(job_bullets, 1):
+                        st.markdown(f'<div class="bullet-point"><strong>{job_idx}.{i}.</strong> {bullet}</div>', unsafe_allow_html=True)
+                    st.markdown("---")
             else:
                 st.warning("No bullets were generated. Please check your resume and job description.")
 
-            bullets_text = "\n".join([f"{i}. {b}" for i, b in enumerate(bullets, 1)])
+            # Flatten bullets for download
+            flattened_bullets = []
+            for job_idx, job_bullets in enumerate(bullets, 1):
+                flattened_bullets.append(f"Job Experience {job_idx}:")
+                for i, bullet in enumerate(job_bullets, 1):
+                    flattened_bullets.append(f"{job_idx}.{i}. {bullet}")
+                flattened_bullets.append("")
+
+            bullets_text = "\n".join(flattened_bullets)
             st.download_button(
                 label="💾 Download Resume Bullets",
                 data=bullets_text,
@@ -304,6 +318,54 @@ if generate:
             with st.expander("📊 Verification Details"):
                 st.write("**Passed:**", result.get("verification_passed", False))
                 st.write("**Feedback:**", result.get("feedback", ""))
+
+            # ATS Scoring
+            st.subheader("📊 ATS Compatibility Score")
+            ats_score = result.get("ats_score", 0.0)
+            ats_breakdown = result.get("ats_breakdown", {})
+
+            # Score display with color coding
+            if ats_score >= 80:
+                st.markdown('<div class="success-container">', unsafe_allow_html=True)
+                st.success(f"🎯 Excellent ATS Score: {ats_score}/100")
+                st.markdown('</div>', unsafe_allow_html=True)
+            elif ats_score >= 60:
+                st.markdown('<div class="output-container">', unsafe_allow_html=True)
+                st.info(f"⚖️ Good ATS Score: {ats_score}/100")
+                st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                st.warning(f"⚠️ ATS Score Needs Improvement: {ats_score}/100")
+
+            # Detailed breakdown
+            with st.expander("📈 ATS Score Breakdown", expanded=True):
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric("Keyword Match", f"{ats_breakdown.get('keyword_match', 0)}/100")
+                    matched = ats_breakdown.get('matched_keywords', [])
+                    if matched:
+                        st.write("✅ **Matched Keywords:**")
+                        for keyword in matched[:5]:  # Show first 5
+                            st.write(f"• {keyword}")
+                        if len(matched) > 5:
+                            st.write(f"... and {len(matched) - 5} more")
+
+                with col2:
+                    st.metric("Formatting", f"{ats_breakdown.get('formatting', 0)}/100")
+                    st.write("Checks ATS-friendly formatting")
+
+                with col3:
+                    st.metric("Skills Alignment", f"{ats_breakdown.get('skills_alignment', 0)}/100")
+                    st.write("Skills section relevance")
+
+                # Missing keywords
+                missing = ats_breakdown.get('missing_keywords', [])
+                if missing:
+                    st.warning("🚨 **Consider adding these keywords:**")
+                    for keyword in missing[:10]:  # Show first 10
+                        st.write(f"• {keyword}")
+                    if len(missing) > 10:
+                        st.write(f"... and {len(missing) - 10} more")
 
             st.success("🎊 Your job application materials are ready! Download them above and customize as needed.")
 
