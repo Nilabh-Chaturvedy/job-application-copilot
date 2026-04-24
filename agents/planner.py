@@ -26,13 +26,15 @@ Your job is ONLY to decide which tasks should be run.
 Allowed step names:
 - rewrite_bullets
 - write_cover_letter
+- ats_scoring
 
 Return ONLY valid JSON in this exact format:
-{{"steps":["rewrite_bullets","write_cover_letter"]}}
+{{"steps":["rewrite_bullets","write_cover_letter","ats_scoring"]}}
 
 Rules:
 - Do not write resume bullets
 - Do not write a cover letter
+- Do not perform ATS scoring
 - Do not explain anything
 - Do not include markdown
 - Only return the JSON object

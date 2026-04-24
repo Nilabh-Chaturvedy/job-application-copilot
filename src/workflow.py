@@ -6,6 +6,7 @@ from agents.planner import planner_agent
 from agents.writer import writer_agent
 from agents.verifier import verifier_agent
 from agents.cover_letter_agent import cover_letter_agent
+from agents.ats_scorer import ats_scorer_agent
 
 #Create Graph
 
@@ -14,10 +15,12 @@ def structure_resume_node(state):
     return state
 
 def build_resume_node(state):
-    structured=state["structured_resume"]
+    structured = state["structured_resume"]
 
     if structured.get("experience") and state["rewritten_bullets"]:
-        structured["experience"][0]["bullets"] = state["rewritten_bullets"]
+        for i, exp in enumerate(structured["experience"]):
+            if i < len(state["rewritten_bullets"]):
+                exp["bullets"] = state["rewritten_bullets"][i]
 
     state["final_resume_text"] = build_resume_text(structured)
     return state
@@ -31,6 +34,7 @@ builder.add_node("writer",writer_agent)
 builder.add_node("verifier",verifier_agent)
 builder.add_node("cover_letter",cover_letter_agent)
 builder.add_node("build_resume",build_resume_node)
+builder.add_node("ats_scorer",ats_scorer_agent)
 
 #Define the Agentic Flow
 
@@ -51,6 +55,7 @@ def route_after_verifier(state):
        return "writer"
    
 builder.add_conditional_edges("verifier",route_after_verifier)
-builder.add_edge("build_resume",END)
+builder.add_edge("build_resume","ats_scorer")
+builder.add_edge("ats_scorer",END)
 
 graph=builder.compile()

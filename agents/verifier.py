@@ -1,6 +1,11 @@
 from src.llm_client import client
 
 def verifier_agent(state):
+    # Flatten the rewritten_bullets (list of lists) into a single list for verification
+    all_bullets = []
+    for job_bullets in state.get('rewritten_bullets', []):
+        all_bullets.extend(job_bullets)
+    
     prompt = f"""
     You are a strict resume verifier.
     
@@ -11,7 +16,7 @@ def verifier_agent(state):
     {state['resume_text']}
 
     Generated Bullets:
-    {state['rewritten_bullets']}
+    {chr(10).join(f"- {b}" for b in all_bullets)}
 
     Generated Cover Letter:
     {state['cover_letter']}
