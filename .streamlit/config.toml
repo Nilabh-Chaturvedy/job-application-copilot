@@ -26,3 +26,10 @@ maxMessageSize = 200
 
 # Enables support for websocket compression.
 enableWebsocketCompression = false
+
+[theme]
+base = "dark"
+primaryColor = "#c62e3f"
+backgroundColor = "#060606"
+secondaryBackgroundColor = "#111114"
+textColor = "#f6f1f2"
